@@ -1,0 +1,45 @@
+//只执行一次
+static dispatch_once_t onceToken;
+dispatch_once(&onceToken, ^{
+	//只执行一次内容
+});
+
+//快速迭代
+dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+dispatch_apply(6, queue, ^(size_t index) {
+	NSLog(@"%@", index);
+});
+
+//处理耗时操作
+dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_DEFAULT, 0), ^{
+	//耗时操作 不会阻塞UI线程
+	dispatch_async(dispatch_get_main_queue(), ^(){
+		//回调主线程
+	});
+});
+
+//延时操作
+//参数1 DISPATCH_TIME_NOW 表示 现在   NSEC_PER_SEC 秒   NSEC_PER_MSEC  毫秒  即是多长时间加入队列去执行block
+//参数2  (int64_t)(2 * NSEC_PER_SEC)  表示的是多长时间去执行
+//参数3 dispatch_get_main_queue() 想要加入哪个队列去执行  可以自定义
+dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2*NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+	
+});
+
+
+//应用场景：在开发中,遇到N个网络请求都完成后更新UI的需求,这时使用dispatch_group_async
+//多线程组
+dispatch_queue_t queue = dispatch_get_global_queue(DIAPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+dispatch_group_t group = dispatch_group_create();
+dispatch_group_async(group, queue, ^{
+	//请求
+});
+dispatch_group_async(group, queue, ^{
+	//请求
+});
+
+dispatch_group_notify(group, dispatch_get_main_queue(), ^{
+	//刷新UI	
+});
+
+
